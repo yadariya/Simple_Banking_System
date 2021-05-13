@@ -10,9 +10,7 @@ public class Main {
 
     public static void main(String[] args) {
         while (true) {
-            System.out.println("1. Create an account");
-            System.out.println("2. Log into account");
-            System.out.println("0. Exit");
+            displayPrimaryMenu();
             Scanner scn = new Scanner(System.in);
             int option = scn.nextInt();
             if (option == 0) {
@@ -22,7 +20,8 @@ public class Main {
                 System.out.println("Your card has been created");
                 System.out.println("Your card number:");
                 Random random = new Random();
-                card_number = 4_000_000_000_000_000L + (long) (random.nextDouble() * 999_999_9999L);
+                long card_number_ = 400_000_000_000_000L + (long) (random.nextDouble() * 999_999_999L);
+                card_number = Luhn_algorithm(card_number_);
                 System.out.println(card_number);
                 System.out.println("Your card PIN:");
                 card_code = 1000 + (long) (random.nextDouble() * 8999L);
@@ -35,9 +34,7 @@ public class Main {
                 if (code == card_number && pin == card_code) {
                     System.out.println("You have successfully logged in!");
                     while (true) {
-                        System.out.println("1. Balance");
-                        System.out.println("2. Log out");
-                        System.out.println("0. Exit");
+                        displaySecondaryMenu();
                         int choice = scn.nextInt();
                         if (choice == 1) {
                             System.out.println("Balance: 0");
@@ -53,5 +50,42 @@ public class Main {
                 }
             }
         }
+    }
+
+    public static long Luhn_algorithm(long l) {
+        String temp = Long.toString(l);
+        int[] array = new int[temp.length()];
+        int sum = 0;
+        for (int i = 0; i < temp.length(); i++) {
+            array[i] = temp.charAt(i) - '0';
+            if (i % 2 == 0) {
+                array[i] *= 2;
+            }
+            if (array[i] > 9) {
+                array[i] -= 9;
+            }
+            sum += array[i];
+        }
+        int checksum = 0;
+        for (int i = 1; i <= 9; i++) {
+            if ((sum + i) % 10 == 0) {
+                checksum = i;
+                break;
+            }
+        }
+        String result = Long.toString(l) + checksum;
+        return Long.parseLong(result);
+    }
+
+    public static void displayPrimaryMenu() {
+        System.out.println("1. Create an account");
+        System.out.println("2. Log into account");
+        System.out.println("0. Exit");
+    }
+
+    public static void displaySecondaryMenu() {
+        System.out.println("1. Create an account");
+        System.out.println("2. Log into account");
+        System.out.println("0. Exit");
     }
 }
