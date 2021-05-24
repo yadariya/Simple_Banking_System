@@ -1,5 +1,11 @@
 package banking;
 
+import org.sqlite.SQLiteDataSource;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -8,7 +14,27 @@ public class Main {
     public static long card_number = 0;
     public static long card_code = 0;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
+
+        String url = "jdbc:sqlite:" + args[1];
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl(url);
+
+        try (Connection con = dataSource.getConnection()) {
+            // Statement creation
+            try (Statement statement = con.createStatement()) {
+                // Statement execution
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS card(" +
+                        "id INTEGER," +
+                        "number TEXT," +
+                        "pin TEXT," +
+                        "balance INTEGER DEFAULT 0)");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         while (true) {
             displayPrimaryMenu();
             Scanner scn = new Scanner(System.in);
@@ -26,6 +52,18 @@ public class Main {
                 System.out.println("Your card PIN:");
                 card_code = 1000 + (long) (random.nextDouble() * 8999L);
                 System.out.println(card_code);
+                String sql = "INSERT INTO card VALUES(?,?,?,?)";
+                try (Connection conn = dataSource.getConnection();
+                     PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setInt(1, 1);
+                    pstmt.setString(2, Long.toString(card_number));
+                    pstmt.setString(3, Long.toString(card_code));
+                    pstmt.setInt(4, 0);
+                    pstmt.executeUpdate();
+                    //System.out.println("Everything is okay");
+                } catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
             } else {
                 System.out.println("Enter your card number:");
                 long code = scn.nextLong();
@@ -84,8 +122,8 @@ public class Main {
     }
 
     public static void displaySecondaryMenu() {
-        System.out.println("1. Create an account");
-        System.out.println("2. Log into account");
+        System.out.println("1. Balance");
+        System.out.println("2. Log out");
         System.out.println("0. Exit");
     }
 }
